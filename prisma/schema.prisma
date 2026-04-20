@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// กำหนดสิทธิ์ผู้ใช้งานในระบบ
+enum Role {
+  ADMIN     // ผู้ดูแลระบบ (จัดการได้ทุกอย่าง)
+  TEACHER   // ครู (จัดการเกรด, เช็คชื่อ)
+  STUDENT   // นักเรียน (ดูผลการเรียน, ตารางสอน)
+  PARENT    // ผู้ปกครอง (ดูข้อมูลลูก)
+}
+
+// ตารางข้อมูลผู้ใช้งาน
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // รหัสผ่าน (เราจะใช้ bcrypt เข้ารหัสทีหลังเพื่อความปลอดภัย)
+  name      String
+  role      Role     @default(STUDENT) // ค่าเริ่มต้นถ้าสมัครใหม่ให้เป็นนักเรียน
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model Student {
+  id        String   @id @default(cuid())
+  name      String
+  studentId String   @unique
+  grade     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
