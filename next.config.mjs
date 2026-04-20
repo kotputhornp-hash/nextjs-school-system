@@ -1,13 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  typescript: {
-    // ข้ามการเช็คตัวแดงตอน Build เพื่อให้ Deploy ผ่านง่ายขึ้น
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    // ข้ามการเช็ค Lint ตอน Build
-    ignoreDuringBuilds: true,
-  },
+  typescript: { ignoreBuildErrors: true },
+  eslint: { ignoreDuringBuilds: true },
+  // เพิ่มบรรทัดนี้เพื่อช่วยเรื่องการจัดการ CSS
+  poweredByHeader: false,
 };
 
 export default nextConfig;
