@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,30 +10,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// กำหนดสิทธิ์ผู้ใช้งานในระบบ
-enum Role {
-  ADMIN     // ผู้ดูแลระบบ (จัดการได้ทุกอย่าง)
-  TEACHER   // ครู (จัดการเกรด, เช็คชื่อ)
-  STUDENT   // นักเรียน (ดูผลการเรียน, ตารางสอน)
-  PARENT    // ผู้ปกครอง (ดูข้อมูลลูก)
+// 1. ตารางผู้ใช้งานระบบ (สำหรับ Login)
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  role          String    @default("USER") // เช่น ADMIN, TEACHER, STUDENT
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
-// ตารางข้อมูลผู้ใช้งาน
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String   // รหัสผ่าน (เราจะใช้ bcrypt เข้ารหัสทีหลังเพื่อความปลอดภัย)
-  name      String
-  role      Role     @default(STUDENT) // ค่าเริ่มต้นถ้าสมัครใหม่ให้เป็นนักเรียน
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+// 2. ตารางข้อมูลนักเรียน (สำหรับจัดการประวัตินักเรียน)
 model Student {
-  id        String   @id @default(cuid())
-  name      String
-  studentId String   @unique
-  grade     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  studentId   String   @unique // เลขประจำตัวนักเรียน เช่น 66001
+  firstName   String
+  lastName    String
+  grade       String   // ชั้นเรียน เช่น ม.1/1
+  gender      String?  // เพศ (ใส่ ? เพื่อให้เป็นค่าว่างได้)
+  birthDate   DateTime?
+  address     String?
+  parentPhone String?  // เบอร์ติดต่อผู้ปกครอง
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

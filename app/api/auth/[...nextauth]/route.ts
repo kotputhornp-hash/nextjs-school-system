@@ -18,7 +18,6 @@ const handler = NextAuth({
           throw new Error("กรุณากรอกอีเมลและรหัสผ่าน");
         }
 
-        // 1. ค้นหาอีเมลในฐานข้อมูล
         const user = await prisma.user.findUnique({
           where: { email: credentials.email }
         });
@@ -27,15 +26,19 @@ const handler = NextAuth({
           throw new Error("ไม่พบอีเมลนี้ในระบบ");
         }
 
-        // 2. เอารหัสผ่านที่พิมพ์มา เทียบกับรหัสผ่านที่เข้ารหัสไว้ในฐานข้อมูล
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
 
         if (!isPasswordValid) {
           throw new Error("รหัสผ่านไม่ถูกต้อง");
         }
 
-        // 3. ถ้าผ่านหมด ให้คืนค่าข้อมูลผู้ใช้กลับไป
-        return { id: user.id, name: user.name, email: user.email, role: user.role };
+        // คืนค่าข้อมูลที่จะเอาไปใส่ใน Token
+        return { 
+          id: user.id, 
+          name: user.name, 
+          email: user.email, 
+          role: user.role 
+        };
       }
     })
   ],
@@ -43,8 +46,25 @@ const handler = NextAuth({
     strategy: "jwt",
   },
   pages: {
-    signIn: "/login", // บอกระบบว่าถ้าจะล็อกอิน ให้ไปที่หน้า /login นะ
-  }
+    signIn: "/login",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.role = (user as any).role; 
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        (session.user as any).id = token.id;
+        (session.user as any).role = token.role; 
+      }
+      return session;
+    }
+  },
+  secret: process.env.NEXTAUTH_SECRET,
 });
 
 export { handler as GET, handler as POST };
