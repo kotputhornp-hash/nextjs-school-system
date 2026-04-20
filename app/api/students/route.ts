@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// 1. ดึงข้อมูลนักเรียนทั้งหมด
 export async function GET() {
   try {
     const students = await prisma.student.findMany({
@@ -13,34 +12,33 @@ export async function GET() {
   }
 }
 
-// 2. เพิ่มข้อมูลนักเรียนใหม่
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const student = await prisma.student.create({
+    console.log("Backend รับข้อมูลมาว่าเป็น:", body); // ดูที่ Terminal ของคุณ
+
+    const { studentId, firstName, lastName, grade } = body;
+
+    // ตรวจสอบว่ามีค่าว่างไหม
+    if (!studentId || !firstName || !lastName || !grade) {
+      return NextResponse.json({ error: "กรุณากรอกข้อมูลให้ครบ" }, { status: 400 });
+    }
+
+    const newStudent = await prisma.student.create({
       data: {
-        studentId: body.studentId,
-        firstName: body.firstName, // แก้จาก name เป็น firstName ให้ตรงกับ schema
-        lastName: body.lastName,   // เพิ่ม lastName ให้ตรงกับ schema
-        grade: body.grade,
+        studentId: String(studentId), // ป้องกันปัญหาเรื่อง Type
+        firstName,
+        lastName,
+        grade,
       },
     });
-    return NextResponse.json(student);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "ไม่สามารถเพิ่มข้อมูลได้" }, { status: 400 });
-  }
-}
 
-// 3. ลบข้อมูลนักเรียน
-export async function DELETE(req: Request) {
-  try {
-    const { id } = await req.json();
-    await prisma.student.delete({
-      where: { id: id },
-    });
-    return NextResponse.json({ message: "ลบข้อมูลสำเร็จ" });
-  } catch (error) {
-    return NextResponse.json({ error: "ลบข้อมูลล้มเหลว" }, { status: 500 });
+    return NextResponse.json(newStudent, { status: 201 });
+  } catch (error: any) {
+    console.error("Prisma Error:", error);
+    if (error.code === 'P2002') {
+      return NextResponse.json({ error: "รหัสนักเรียนนี้มีอยู่แล้วในระบบ" }, { status: 400 });
+    }
+    return NextResponse.json({ error: "เกิดข้อผิดพลาดที่เซิร์ฟเวอร์" }, { status: 500 });
   }
 }
