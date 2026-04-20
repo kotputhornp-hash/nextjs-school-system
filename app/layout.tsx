@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
+import "./globals.css"; // แก้จุดตรงนี้ให้เหลือแค่ ./
 import { getServerSession } from "next-auth";
 import AuthProvider from "@/components/AuthProvider";
 
@@ -21,8 +21,8 @@ export default async function RootLayout({
   return (
     <html lang="th">
       <body className={inter.className}>
-        <AuthProvider session={session}> 
-          {/* ลบบรรทัด Navbar ออกไปก่อนเพื่อให้ Build ผ่านและบันทึกข้อมูลได้ */}
+        {/* ลบ session={session} ออกเพื่อให้หายแดง */}
+        <AuthProvider> 
           <main className="min-h-screen bg-gray-50">
             {children}
           </main>
