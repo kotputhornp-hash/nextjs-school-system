@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import LogoutButton from "@/components/LogoutButton"; // เดี๋ยวเราจะสร้างไฟล์นี้ครับ
+import LogoutButton from "@/components/LogoutButton";
 import Link from "next/link";
 
 export default async function DashboardPage() {
